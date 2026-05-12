@@ -176,24 +176,47 @@ HTML);
 
     public function fetch(Request $request)
     {
-        $type = $request->query('type', 'android');
+        // $ip = $this->get_client_ip();
+        // $uuid = !empty($_GET['uuid']) ? $_GET['uuid'] : '';
+        // $data_check = [
+        //     'device_type' => $type,
+        //     'resolution' => $_GET['width'] . ' x ' . $_GET['height'],
+        //     'ip_address' => $ip,
+        // ];
 
-        $data = DB::table('applinks_data')
-            ->orderByDesc('id')
-            ->first();
+        // $find_device_data = $this->ci->db->order_by('id', 'desc')->get_where('applinks_data', $type == 'android' ? ['id' => $uuid] : $data_check)->row();
+        // if ($find_device_data) {
+        //     $this->ci->db->delete('applinks_data', ['id' => $find_device_data->id]);
+        //     echo json_encode(['success' => 1, 'parameters' => @json_decode($find_device_data->query_string)]);
+        //     exit;
+        // }
+        
+        $type = $this->os($request->userAgent());
+        $ip = $this->getClientIp($request);
+        $uuid = $request->query('uuid');
 
-        if ($data) {
-            DB::table('applinks_data')->delete($data->id);
+        $query = DB::table('applinks_data');
 
-            return response()->json([
-                'success' => 1,
-                'parameters' => json_decode($data->query_string)
+        if ($type === 'ANDROID' && $uuid) {
+            $query->where('id', $uuid);
+        } else {
+            $query->where([
+                'device_type' => strtolower($type),
+                'resolution' => ($request->query('width') ?? 0) . ' x ' . ($request->query('height') ?? 0),
+                'ip_address' => $ip,
             ]);
         }
 
-        return response()->json([
-            'success' => 0,
-            'parameters' => null
-        ]);
+        $find_device_data = $query->orderBy('id', 'desc')->first();
+
+        if ($find_device_data) {
+            DB::table('applinks_data')->where('id', $find_device_data->id)->delete();
+            return response()->json([
+                'success' => 1,
+                'parameters' => json_decode($find_device_data->query_string)
+            ]);
+        }
+
+        return response()->json(['success' => 0]);
     }
 }
