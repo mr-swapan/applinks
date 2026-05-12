@@ -94,12 +94,94 @@ Open `/.well-known/assetlinks.json` on your domain and verify it returns your:
 - `ANDROID_PACKAGE`
 - `ANDROID_SHA256_CERT_FINGERPRINT`
 
+#### Android app configuration (required)
+
+1. **Add an intent-filter for App Links** (Android 6.0+).
+
+In your `AndroidManifest.xml` (inside the Activity you want to open):
+
+```xml
+<activity android:name=".MainActivity">
+    <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <!-- Use your real domain -->
+        <data
+            android:scheme="https"
+            android:host="your-domain.com"
+            android:pathPrefix="/applinks" />
+    </intent-filter>
+</activity>
+```
+
+Notes:
+
+- `android:autoVerify="true"` asks Android to verify the domain ownership using `/.well-known/assetlinks.json`.
+- `android:pathPrefix="/applinks"` should match your redirect path (default is `/applinks/...`).
+
+2. **Get your signing certificate SHA-256 fingerprint** and set it as `ANDROID_SHA256_CERT_FINGERPRINT`.
+
+Common ways to obtain the SHA-256:
+
+- From Play Console (App Integrity / App signing)
+- From your keystore using `keytool` (debug or release keystore)
+
+3. **Ensure HTTPS is used** for your domain and that `/.well-known/assetlinks.json` is reachable publicly.
+
+4. **Handle incoming links in your app**.
+
+When the app is opened by an App Link, it receives the URL via the Activity intent data. Parse the query string to get the parameters you attached (e.g. `campaign`, `user_id`, etc.).
+
 ### iOS (Apple App Site Association)
 
 Open `/.well-known/apple-app-site-association` and verify it returns:
 
 - `IOS_TEAM_ID.IOS_PACKAGE`
 - an `applinks` component pointing to your `APPLINKS_PREFIX`
+
+#### iOS app configuration (required)
+
+1. **Enable Associated Domains** capability in Xcode.
+
+In your app target:
+
+- Signing & Capabilities → `+ Capability` → **Associated Domains**
+
+2. **Add your applinks domain entry**:
+
+Add an entry like:
+
+- `applinks:your-domain.com`
+
+3. **Ensure `apple-app-site-association` is served correctly**.
+
+This package provides:
+
+- `/.well-known/apple-app-site-association`
+- `/apple-app-site-association`
+
+Notes:
+
+- The response must be served over HTTPS.
+- Apple expects no redirects for the `/.well-known/...` path.
+
+4. **Handle Universal Links in the app**.
+
+Implement handling for the incoming universal link URL and parse the query parameters you attached.
+
+5. **iOS fallback behavior in this package**
+
+If the request is detected as iOS, this package returns a small HTML page that:
+
+- Attempts to open `IOS_APP_CUSTOM_LINK` with the same query string
+- After ~30 seconds falls back to `IOS_APPSTORE_URL`
+
+Set these values:
+
+- `IOS_APP_CUSTOM_LINK` (your app’s custom URL scheme link, example: `com.example.app://applinks`)
+- `IOS_APPSTORE_URL` (your App Store page URL)
 
 ## License
 
