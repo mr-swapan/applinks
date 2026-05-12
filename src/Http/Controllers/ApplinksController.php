@@ -175,22 +175,7 @@ HTML);
     }
 
     public function fetch(Request $request)
-    {
-        // $ip = $this->get_client_ip();
-        // $uuid = !empty($_GET['uuid']) ? $_GET['uuid'] : '';
-        // $data_check = [
-        //     'device_type' => $type,
-        //     'resolution' => $_GET['width'] . ' x ' . $_GET['height'],
-        //     'ip_address' => $ip,
-        // ];
-
-        // $find_device_data = $this->ci->db->order_by('id', 'desc')->get_where('applinks_data', $type == 'android' ? ['id' => $uuid] : $data_check)->row();
-        // if ($find_device_data) {
-        //     $this->ci->db->delete('applinks_data', ['id' => $find_device_data->id]);
-        //     echo json_encode(['success' => 1, 'parameters' => @json_decode($find_device_data->query_string)]);
-        //     exit;
-        // }
-        
+    {        
         $type = $this->os($request->userAgent());
         $ip = $this->getClientIp($request);
         $uuid = $request->query('uuid');
