@@ -136,7 +136,7 @@ HTML);
                         let timeout = 30000;
                         setTimeout(function() {
                             if (Date.now() - now < (timeout + 30)) {
-                                window.location = "<?php echo $ios_app_store_url; ?>";
+                                window.location = "'. $url .'";
                             }
                         }, timeout);
                     };
@@ -161,23 +161,63 @@ HTML);
         session()->forget('APPLINKS_DEVICE_DATA');
 
         if (!$device && $os !== "ANDROID") {
-            return response()->make("
-            <script>
-            async function set(){
-                await fetch('/applinks_save_device_info?height='+screen.height+'&width='+screen.width);
-                location.reload();
-            }
-            set();
-            </script>
-            ");
+            return response()->make(
+                <<<HTML
+            <!DOCTYPE html>
+            <html lang="en">
+
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Applinks</title>
+            </head>
+
+            <body>
+                <script async="true">
+                    function iPad() {
+                        return [
+                                'iPad Simulator',
+                                'iPhone Simulator',
+                                'iPod Simulator',
+                                'iPad',
+                                'iPhone',
+                                'iPo'
+                            ].includes(navigator.platform)
+                            // iPad on iOS 13 detection
+                            ||
+                            (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
+                    }
+
+                    function tablet(){
+                        return navigator.userAgent.toLocaleLowerCase().includes('android');
+                    }
+
+                    function screen_height() {
+                        return screen.height;
+                    }
+
+                    function screen_width() {
+                        return screen.width;
+                    }
+                    async function set_device_data() {
+                        await fetch('/applinks_save_device_info?is_ipad=' + (iPad() ? 1 : 0) + '&height=' + screen_height() + '&width=' + screen_width() + '&is_tab=' + (tablet() ? 1 : 0))
+                        window.location.reload();
+                    }
+                    set_device_data();
+                </script>
+            </body>
+
+            </html>
+            HTML
+            );
         }
 
-        if ($os === "ANDROID") {
+        if ($os === "ANDROID" || $device['is_tab'] === 1) {
             $id = $this->saveData('android', $request, $device);
             return $this->redirectToPlaystore($id);
         }
 
-        if ($os === "IOS") {
+        if ($os === "IOS" || ($os() == "MACINTOSH" && $device['is_ipad'] == 1)) {
             return $this->redirectToAppstore($request, $device);
         }
 
