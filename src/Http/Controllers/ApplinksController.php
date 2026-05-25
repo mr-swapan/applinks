@@ -217,7 +217,7 @@ HTML);
             return $this->redirectToPlaystore($id);
         }
 
-        if ($os === "IOS" || ($os() == "MACINTOSH" && $device['is_ipad'] == 1)) {
+        if ($os === "IOS" || ($os == "MACINTOSH" && $device['is_ipad'] == 1)) {
             return $this->redirectToAppstore($request, $device);
         }
 
