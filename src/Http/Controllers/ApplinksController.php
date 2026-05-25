@@ -132,7 +132,7 @@ HTML);
                 <script>
                     window.onload = function() {
                         var now = Date.now();
-                        window.location = "' . $ios_app_custom_link . '?" + "' . http_build_query($this->saved_data) . '";
+                        window.location = "' . $ios_app_custom_link . '?" + "' . http_build_query($request->query()) . '";
                         let timeout = 30000;
                         setTimeout(function() {
                             if (Date.now() - now < (timeout + 30)) {
