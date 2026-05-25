@@ -119,21 +119,31 @@ HTML);
         $url = config('applinks.ios_app_store_url');
         $ios_app_custom_link = config('applinks.ios_app_custom_link');
 
-        return response()->make("
-        <html>
-        <body>
-        <script>
-        var now = Date.now();
-        window.location = \"$ios_app_custom_link?\" + \"" . http_build_query($request->query()) . "\";
-        setTimeout(function(){
-            if(Date.now()-now<30000){
-                window.location = \"$url\";
-            }
-        },30000);
-        </script>
-        </body>
-        </html>
-        ");
+        return response()->make('
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Applinks</title>
+            </head>
+            <body style="padding-top: 40vh">
+                <div style="display: flex; justify-content: center; align-items: center;"> <em>Please wait until redirect you to Mobile App...</em> </div>
+                <script>
+                    window.onload = function() {
+                        var now = Date.now();
+                        window.location = "' . $ios_app_custom_link . '?" + "' . http_build_query($this->saved_data) . '";
+                        let timeout = 30000;
+                        setTimeout(function() {
+                            if (Date.now() - now < (timeout + 30)) {
+                                window.location = "<?php echo $ios_app_store_url; ?>";
+                            }
+                        }, timeout);
+                    };
+                </script>
+            </body>
+            </html>
+        ');
     }
 
     private function redirectToWeb(Request $request)
