@@ -13,6 +13,6 @@ Route::middleware(['web'])->group(function() {
     Route::get('/applinks_save_device_info', [ApplinksController::class, 'saveDeviceInfo']);
     Route::get('/js_editor', [ApplinksController::class, 'jsEditor']);
     
-    Route::get('/applinks/{any?}', [ApplinksController::class, 'redirect'])
+    Route::get('/'. rtrim(env('APPLINKS_PREFIX', 'applinks/*'), "/*") .'/{any?}', [ApplinksController::class, 'redirect'])
         ->where('any', '.*');
 });
