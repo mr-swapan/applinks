@@ -226,7 +226,7 @@ HTML);
 
     public function fetch(Request $request)
     {        
-        $type = $this->os($request->userAgent());
+        $type = strtoupper($request->query('type', 'android'));
         $ip = $this->getClientIp($request);
         $uuid = $request->query('uuid');
 
