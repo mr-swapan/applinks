@@ -133,7 +133,7 @@ HTML);
                     window.onload = function() {
                         var now = Date.now();
                         window.location = "' . $ios_app_custom_link . '?" + "' . http_build_query($request->query()) . '";
-                        let timeout = 30000;
+                        let timeout = 10000;
                         setTimeout(function() {
                             if (Date.now() - now < (timeout + 30)) {
                                 window.location = "'. $url .'";
@@ -218,6 +218,7 @@ HTML);
         }
 
         if ($os === "IOS" || ($os == "MACINTOSH" && $device['is_ipad'] == 1)) {
+            $id = $this->saveData('android', $request, $device);
             return $this->redirectToAppstore($request, $device);
         }
 
