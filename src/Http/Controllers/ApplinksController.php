@@ -218,7 +218,7 @@ HTML);
         }
 
         if ($os === "IOS" || ($os == "MACINTOSH" && $device['is_ipad'] == 1)) {
-            $id = $this->saveData('android', $request, $device);
+            $id = $this->saveData('ios', $request, $device);
             return $this->redirectToAppstore($request, $device);
         }
 
